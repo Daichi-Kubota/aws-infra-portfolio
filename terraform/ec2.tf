@@ -107,3 +107,14 @@ resource "aws_instance" "web" {
     Project = var.project_name
   }
 }
+
+# Elastic IP：EC2停止・再起動後もIPが変わらないように固定
+resource "aws_eip" "web" {
+  instance = aws_instance.web.id
+  domain   = "vpc"
+
+  tags = {
+    Name    = "${var.project_name}-eip"
+    Project = var.project_name
+  }
+}

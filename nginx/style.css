@@ -1,0 +1,257 @@
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --bg:       #f9f7f2;
+  --surface:  #ffffff;
+  --text:     #1e1e1e;
+  --muted:    #888;
+  --accent:   #3d6b45;
+  --sub:      #8b7355;
+  --border:   #e5dfd5;
+  --tag-bg:   #eef3ec;
+}
+
+html { scroll-behavior: smooth; }
+
+body {
+  font-family: "Hiragino Kaku Gothic ProN", "Meiryo", sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  line-height: 1.8;
+}
+
+/* ── トップライン ── */
+.top-bar {
+  height: 3px;
+  background: linear-gradient(90deg, var(--accent), #a8c5a0, var(--sub));
+}
+
+/* ── メインコンテンツ ── */
+main {
+  flex: 1;
+  width: 100%;
+  max-width: 640px;
+  margin: 0 auto;
+  padding: 4rem 1.8rem 3rem;
+}
+
+/* ── 区切り線 ── */
+.divider {
+  width: 32px;
+  height: 1px;
+  background: var(--accent);
+  margin: 2.4rem auto;
+  opacity: 0.6;
+}
+
+/* ── セクション見出し ── */
+.section-label {
+  font-size: 0.72rem;
+  letter-spacing: 0.25em;
+  color: var(--muted);
+  text-align: center;
+  margin-bottom: 1.4rem;
+}
+
+/* ── ヘッダーブロック ── */
+.name-ja {
+  font-family: "Hiragino Mincho ProN", "Yu Mincho", "Georgia", serif;
+  font-size: clamp(2rem, 7vw, 2.8rem);
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-align: center;
+  line-height: 1.2;
+}
+
+.name-en {
+  font-size: 0.78rem;
+  letter-spacing: 0.35em;
+  color: var(--muted);
+  text-align: center;
+  margin-top: 0.5rem;
+  text-transform: uppercase;
+}
+
+.title-badge {
+  display: block;
+  width: fit-content;
+  margin: 1rem auto 0;
+  padding: 0.3rem 1.1rem;
+  border: 1px solid var(--accent);
+  border-radius: 99px;
+  font-size: 0.8rem;
+  color: var(--accent);
+  letter-spacing: 0.15em;
+}
+
+/* ── 自己紹介 ── */
+.copy {
+  text-align: center;
+  font-size: 0.95rem;
+  color: #555;
+}
+
+/* ── 登録販売者ボックス ── */
+.yakuzaishi-box {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-left: 3px solid var(--accent);
+  border-radius: 4px;
+  padding: 1.6rem 1.8rem;
+}
+
+.yakuzaishi-box .box-title {
+  font-family: "Hiragino Mincho ProN", "Yu Mincho", serif;
+  font-size: 0.85rem;
+  letter-spacing: 0.2em;
+  color: var(--accent);
+  margin-bottom: 1rem;
+  text-align: center;
+}
+
+.yakuzaishi-box p {
+  font-size: 0.9rem;
+  color: #444;
+  line-height: 2;
+}
+
+/* ── INTERESTSカード ── */
+.interest-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.9rem;
+}
+
+.interest-card {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  padding: 1.2rem 1.3rem;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  text-decoration: none;
+  color: var(--text);
+  transition: border-color 0.2s, transform 0.15s, box-shadow 0.2s;
+}
+
+.interest-card:hover {
+  border-color: var(--accent);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(61, 107, 69, 0.1);
+}
+
+.interest-card .emoji {
+  font-size: 1.5rem;
+  margin-bottom: 0.5rem;
+}
+
+.interest-card .card-title {
+  font-size: 0.9rem;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  margin-bottom: 0.2rem;
+}
+
+.interest-card .card-sub {
+  font-size: 0.72rem;
+  color: var(--muted);
+}
+
+/* ── GitHubボタン ── */
+.github-wrap { text-align: center; }
+
+.github-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.55rem;
+  padding: 0.75rem 1.8rem;
+  background: var(--accent);
+  color: #fff;
+  border-radius: 4px;
+  text-decoration: none;
+  font-size: 0.85rem;
+  letter-spacing: 0.05em;
+  transition: background 0.2s, transform 0.15s;
+}
+
+.github-btn:hover {
+  background: #2f5435;
+  transform: translateY(-1px);
+}
+
+.github-btn svg {
+  width: 17px; height: 17px;
+  fill: currentColor; flex-shrink: 0;
+}
+
+.powered {
+  text-align: center;
+  font-size: 0.7rem;
+  color: #bbb;
+  letter-spacing: 0.08em;
+  margin-top: 1rem;
+}
+
+/* ── サブページ用 ── */
+.back-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.8rem;
+  color: var(--muted);
+  text-decoration: none;
+  letter-spacing: 0.05em;
+  margin-bottom: 2.5rem;
+  transition: color 0.2s;
+}
+
+.back-link:hover { color: var(--accent); }
+
+.page-title {
+  font-family: "Hiragino Mincho ProN", "Yu Mincho", serif;
+  font-size: clamp(1.6rem, 5vw, 2.2rem);
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-align: center;
+}
+
+.article-body {
+  font-size: 0.95rem;
+  color: #3a3a3a;
+  line-height: 2.2;
+}
+
+.article-body p + p { margin-top: 1.4em; }
+
+/* ── フッター ── */
+footer {
+  border-top: 1px solid var(--border);
+  padding: 1.4rem 1.5rem;
+  text-align: center;
+}
+
+.footer-name {
+  font-size: 0.78rem;
+  color: var(--muted);
+  margin-bottom: 0.3rem;
+}
+
+.footer-hobbies {
+  font-size: 0.72rem;
+  color: #ccc;
+}
+
+/* ── レスポンシブ ── */
+@media (max-width: 480px) {
+  main { padding: 2.5rem 1.2rem 2rem; }
+  .interest-grid { grid-template-columns: 1fr 1fr; gap: 0.7rem; }
+  .interest-card { padding: 1rem; }
+}
+
+@media (max-width: 360px) {
+  .interest-grid { grid-template-columns: 1fr; }
+}

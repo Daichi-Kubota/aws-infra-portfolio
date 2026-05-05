@@ -9,18 +9,18 @@ output "public_subnet_id" {
 }
 
 output "ec2_public_ip" {
-  description = "EC2のパブリックIPアドレス"
-  value       = aws_instance.web.public_ip
+  description = "EC2の固定IPアドレス（Elastic IP）"
+  value       = aws_eip.web.public_ip
 }
 
-output "ec2_public_dns" {
-  description = "EC2のパブリックDNS名"
-  value       = aws_instance.web.public_dns
+output "site_url" {
+  description = "サイトURL"
+  value       = "http://${aws_eip.web.public_ip}"
 }
 
 output "ssh_command" {
   description = "SSH接続コマンド"
-  value       = "ssh -i ~/.ssh/portfolio-key ec2-user@${aws_instance.web.public_ip}"
+  value       = "ssh -i ~/.ssh/portfolio-key ec2-user@${aws_eip.web.public_ip}"
 }
 
 output "s3_bucket_name" {
