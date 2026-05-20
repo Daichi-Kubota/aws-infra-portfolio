@@ -1,6 +1,6 @@
 # Nginxログを収集するロググループ
 resource "aws_cloudwatch_log_group" "nginx_access" {
-  name              = "/portfolio/nginx/access"
+  name              = "/${var.project_name}/nginx/access"
   retention_in_days = 30  # 30日でログ自動削除
 
   tags = {
@@ -10,7 +10,7 @@ resource "aws_cloudwatch_log_group" "nginx_access" {
 }
 
 resource "aws_cloudwatch_log_group" "nginx_error" {
-  name              = "/portfolio/nginx/error"
+  name              = "/${var.project_name}/nginx/error"
   retention_in_days = 30
 
   tags = {
@@ -46,9 +46,10 @@ resource "aws_cloudwatch_metric_alarm" "cpu_high" {
   period              = 300    # 5分間隔で測定
   statistic           = "Average"
   threshold           = 80     # 80%が閾値
-  alarm_description   = "CPU使用率が80%を超えました"
-  alarm_actions       = [aws_sns_topic.alerts.arn]
-  ok_actions          = [aws_sns_topic.alerts.arn]  # 回復時も通知
+  alarm_description         = "CPU使用率が80%を超えました"
+  alarm_actions             = [aws_sns_topic.alerts.arn]
+  ok_actions                = [aws_sns_topic.alerts.arn]      # 回復時も通知
+  insufficient_data_actions = [aws_sns_topic.alerts.arn]      # EC2停止中などデータ欠損時も通知
 
   dimensions = {
     InstanceId = aws_instance.web.id

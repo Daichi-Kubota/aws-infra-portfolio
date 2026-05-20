@@ -3,13 +3,22 @@ resource "aws_security_group" "web" {
   description = "Web server security group"
   vpc_id      = aws_vpc.main.id
 
-  # HTTP：全員がWebサイトにアクセスできる
+  # HTTP：全員がWebサイトにアクセスできる（CertbotのHTTP-01チャレンジにも必要）
   ingress {
     from_port   = 80
     to_port     = 80
     protocol    = "tcp"
     cidr_blocks = ["0.0.0.0/0"]
     description = "HTTP from anywhere"
+  }
+
+  # HTTPS：SSL証明書取得後のメインアクセス
+  ingress {
+    from_port   = 443
+    to_port     = 443
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+    description = "HTTPS from anywhere"
   }
 
   # SSH：自分のIPのみ接続可能（セキュリティ最小権限の原則）

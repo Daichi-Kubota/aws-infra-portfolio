@@ -30,5 +30,10 @@ variable "my_ip" {
 variable "alert_email" {
   description = "CloudWatchアラートの通知先メールアドレス"
   type        = string
-  default     = "fcl37881@gmail.com"
+}
+
+variable "domain_name" {
+  description = "取得したドメイン名（例: infra-portfolio.dev）"
+  type        = string
+  default     = "infra-portfolio.dev"
 }

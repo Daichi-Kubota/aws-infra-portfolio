@@ -35,10 +35,19 @@ resource "aws_iam_role_policy_attachment" "cloudwatch" {
   policy_arn = "arn:aws:iam::aws:policy/CloudWatchAgentServerPolicy"
 }
 
-# S3への書き込み権限をアタッチ
-resource "aws_iam_role_policy_attachment" "s3" {
-  role       = aws_iam_role.ec2_role.name
-  policy_arn = "arn:aws:iam::aws:policy/AmazonS3FullAccess"
+# S3：ログバケット内のnginxパスへのPutObjectのみ許可（最小権限の原則）
+resource "aws_iam_role_policy" "s3_logs" {
+  name = "${var.project_name}-s3-logs-policy"
+  role = aws_iam_role.ec2_role.id
+
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [{
+      Effect   = "Allow"
+      Action   = ["s3:PutObject"]
+      Resource = "${aws_s3_bucket.logs.arn}/nginx/*"
+    }]
+  })
 }
 
 # Instance Profile：IAM RoleをEC2に紐付けるための中間層
@@ -72,11 +81,11 @@ resource "aws_instance" "web" {
   key_name               = aws_key_pair.portfolio.key_name
   iam_instance_profile   = aws_iam_instance_profile.ec2_profile.name
 
-  # 起動時に自動実行されるスクリプト（Nginxインストール）
+  # 起動時に自動実行されるスクリプト（Nginx + CloudWatch Agent インストール）
   user_data = <<-EOF
     #!/bin/bash
     dnf update -y
-    dnf install -y nginx
+    dnf install -y nginx amazon-cloudwatch-agent
     systemctl start nginx
     systemctl enable nginx
 
@@ -100,7 +109,45 @@ resource "aws_instance" "web" {
     </body>
     </html>
     HTML
+
+    # CloudWatch AgentにNginxログの収集先を設定
+    cat > /opt/aws/amazon-cloudwatch-agent/etc/amazon-cloudwatch-agent.json << 'CWCONFIG'
+    {
+      "logs": {
+        "logs_collected": {
+          "files": {
+            "collect_list": [
+              {
+                "file_path": "/var/log/nginx/access.log",
+                "log_group_name": "/${var.project_name}/nginx/access",
+                "log_stream_name": "{instance_id}",
+                "timezone": "UTC"
+              },
+              {
+                "file_path": "/var/log/nginx/error.log",
+                "log_group_name": "/${var.project_name}/nginx/error",
+                "log_stream_name": "{instance_id}",
+                "timezone": "UTC"
+              }
+            ]
+          }
+        }
+      }
+    }
+    CWCONFIG
+
+    /opt/aws/amazon-cloudwatch-agent/bin/amazon-cloudwatch-agent-ctl \
+      -a fetch-config \
+      -m ec2 \
+      -c file:/opt/aws/amazon-cloudwatch-agent/etc/amazon-cloudwatch-agent.json \
+      -s
   EOF
+
+  # IMDSv2を強制：SSRF攻撃によるメタデータ窃取を防ぐ
+  metadata_options {
+    http_tokens                 = "required"
+    http_put_response_hop_limit = 1
+  }
 
   tags = {
     Name    = "${var.project_name}-web-server"

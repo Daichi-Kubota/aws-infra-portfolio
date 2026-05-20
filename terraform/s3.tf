@@ -33,5 +33,16 @@ resource "aws_s3_bucket_lifecycle_configuration" "logs" {
   }
 }
 
+# サーバーサイド暗号化（SSE-S3）：保存データを暗号化
+resource "aws_s3_bucket_server_side_encryption_configuration" "logs" {
+  bucket = aws_s3_bucket.logs.id
+
+  rule {
+    apply_server_side_encryption_by_default {
+      sse_algorithm = "AES256"
+    }
+  }
+}
+
 # 現在のAWSアカウント情報を取得（バケット名の一意性確保に使用）
 data "aws_caller_identity" "current" {}

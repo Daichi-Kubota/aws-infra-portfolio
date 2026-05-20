@@ -32,3 +32,18 @@ output "sns_topic_arn" {
   description = "アラート通知用SNSトピックARN"
   value       = aws_sns_topic.alerts.arn
 }
+
+output "instance_id" {
+  description = "EC2インスタンスID"
+  value       = aws_instance.web.id
+}
+
+output "nameservers" {
+  description = "Route53ネームサーバー（ドメイン登録後にRoute53コンソールで確認・設定済みのはず）"
+  value       = aws_route53_zone.main.name_servers
+}
+
+output "https_url" {
+  description = "HTTPS URL（setup-ssl.sh実行後に有効）"
+  value       = "https://${var.domain_name}"
+}
