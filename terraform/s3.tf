@@ -1,6 +1,6 @@
 resource "aws_s3_bucket" "logs" {
   bucket        = "${var.project_name}-logs-${data.aws_caller_identity.current.account_id}"
-  force_destroy = true  # terraform destroy時にバケットごと削除できるようにする
+  force_destroy = true # terraform destroy時にバケットごと削除できるようにする
 
   tags = {
     Name    = "${var.project_name}-logs"
@@ -25,7 +25,7 @@ resource "aws_s3_bucket_lifecycle_configuration" "logs" {
     id     = "delete-old-logs"
     status = "Enabled"
 
-    filter {}  # 全オブジェクトを対象
+    filter {} # 全オブジェクトを対象
 
     expiration {
       days = 90

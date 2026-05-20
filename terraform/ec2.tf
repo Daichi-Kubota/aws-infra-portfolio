@@ -1,7 +1,7 @@
 # SSH公開鍵をAWSに登録
 resource "aws_key_pair" "portfolio" {
   key_name   = "${var.project_name}-key"
-  public_key = file("~/.ssh/portfolio-key.pub")
+  public_key = var.ssh_public_key != "" ? var.ssh_public_key : file("~/.ssh/portfolio-key.pub")
 
   tags = {
     Name    = "${var.project_name}-key"
@@ -75,7 +75,7 @@ data "aws_ami" "amazon_linux_2023" {
 # EC2インスタンス本体
 resource "aws_instance" "web" {
   ami                    = data.aws_ami.amazon_linux_2023.id
-  instance_type          = "t3.micro"  # 無料枠対象
+  instance_type          = "t3.micro" # 無料枠対象
   subnet_id              = aws_subnet.public.id
   vpc_security_group_ids = [aws_security_group.web.id]
   key_name               = aws_key_pair.portfolio.key_name

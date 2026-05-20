@@ -1,7 +1,7 @@
 # Nginxログを収集するロググループ
 resource "aws_cloudwatch_log_group" "nginx_access" {
   name              = "/${var.project_name}/nginx/access"
-  retention_in_days = 30  # 30日でログ自動削除
+  retention_in_days = 30 # 30日でログ自動削除
 
   tags = {
     Name    = "${var.project_name}-nginx-access-logs"
@@ -38,18 +38,18 @@ resource "aws_sns_topic_subscription" "email" {
 
 # CPU使用率が80%超過で5分間継続したらアラート発火
 resource "aws_cloudwatch_metric_alarm" "cpu_high" {
-  alarm_name          = "${var.project_name}-cpu-high"
-  comparison_operator = "GreaterThanThreshold"
-  evaluation_periods  = 2      # 2回連続で閾値超過したら発火
-  metric_name         = "CPUUtilization"
-  namespace           = "AWS/EC2"
-  period              = 300    # 5分間隔で測定
-  statistic           = "Average"
-  threshold           = 80     # 80%が閾値
+  alarm_name                = "${var.project_name}-cpu-high"
+  comparison_operator       = "GreaterThanThreshold"
+  evaluation_periods        = 2 # 2回連続で閾値超過したら発火
+  metric_name               = "CPUUtilization"
+  namespace                 = "AWS/EC2"
+  period                    = 300 # 5分間隔で測定
+  statistic                 = "Average"
+  threshold                 = 80 # 80%が閾値
   alarm_description         = "CPU使用率が80%を超えました"
   alarm_actions             = [aws_sns_topic.alerts.arn]
-  ok_actions                = [aws_sns_topic.alerts.arn]      # 回復時も通知
-  insufficient_data_actions = [aws_sns_topic.alerts.arn]      # EC2停止中などデータ欠損時も通知
+  ok_actions                = [aws_sns_topic.alerts.arn] # 回復時も通知
+  insufficient_data_actions = [aws_sns_topic.alerts.arn] # EC2停止中などデータ欠損時も通知
 
   dimensions = {
     InstanceId = aws_instance.web.id
