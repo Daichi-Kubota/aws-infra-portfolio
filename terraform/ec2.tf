@@ -79,6 +79,7 @@ resource "aws_instance" "web" {
   # 起動時に自動実行されるスクリプト（Docker + Nginx + CloudWatch Agent）
   user_data = <<-EOF
     #!/bin/bash
+    set -e  # いずれかのコマンドが失敗したら即座にスクリプトを停止する
     dnf update -y
     dnf install -y amazon-cloudwatch-agent git docker
 
