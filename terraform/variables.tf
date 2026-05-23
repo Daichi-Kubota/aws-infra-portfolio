@@ -33,8 +33,3 @@ variable "domain_name" {
   default     = "infra-portfolio.dev"
 }
 
-variable "ssh_public_key" {
-  description = "EC2に登録するSSH公開鍵（CI環境ではSecretから渡す）"
-  type        = string
-  default     = ""
-}

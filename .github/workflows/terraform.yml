@@ -33,7 +33,6 @@ jobs:
     runs-on: ubuntu-latest
     env:
       TF_VAR_alert_email: ${{ secrets.TF_VAR_ALERT_EMAIL }}
-      TF_VAR_ssh_public_key: ${{ secrets.TF_VAR_SSH_PUBLIC_KEY }}
     steps:
       - uses: actions/checkout@v4
 
@@ -61,7 +60,6 @@ jobs:
       id-token: write
     env:
       TF_VAR_alert_email: ${{ secrets.TF_VAR_ALERT_EMAIL }}
-      TF_VAR_ssh_public_key: ${{ secrets.TF_VAR_SSH_PUBLIC_KEY }}
     steps:
       - uses: actions/checkout@v4
 

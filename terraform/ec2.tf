@@ -1,14 +1,3 @@
-# SSH公開鍵をAWSに登録
-resource "aws_key_pair" "portfolio" {
-  key_name   = "${var.project_name}-key"
-  public_key = var.ssh_public_key != "" ? var.ssh_public_key : file("~/.ssh/portfolio-key.pub")
-
-  tags = {
-    Name    = "${var.project_name}-key"
-    Project = var.project_name
-  }
-}
-
 # IAM Role：EC2がCloudWatch・S3にアクセスするための「社員証」
 resource "aws_iam_role" "ec2_role" {
   name = "${var.project_name}-ec2-role"
@@ -85,7 +74,6 @@ resource "aws_instance" "web" {
   instance_type          = "t3.micro" # 無料枠対象
   subnet_id              = aws_subnet.public.id
   vpc_security_group_ids = [aws_security_group.web.id]
-  key_name               = aws_key_pair.portfolio.key_name
   iam_instance_profile   = aws_iam_instance_profile.ec2_profile.name
 
   # 起動時に自動実行されるスクリプト（Nginx + CloudWatch Agent インストール）

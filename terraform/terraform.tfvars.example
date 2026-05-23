@@ -8,6 +8,3 @@ alert_email = "your-email@example.com"
 
 # 取得したドメイン名
 domain_name = "your-domain.dev"
-
-# SSH公開鍵（CI環境では GitHub Secrets から渡す。ローカルでは空のままでも ~/.ssh/portfolio-key.pub が使われる）
-ssh_public_key = ""

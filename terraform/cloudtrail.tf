@@ -4,7 +4,7 @@
 # CloudTrailログの保存先S3バケット
 resource "aws_s3_bucket" "cloudtrail" {
   bucket        = "${var.project_name}-cloudtrail-${data.aws_caller_identity.current.account_id}"
-  force_destroy = true
+  force_destroy = true # ポートフォリオ用途のみ。本番では false にして監査ログを保護する
 
   tags = {
     Name    = "${var.project_name}-cloudtrail"
