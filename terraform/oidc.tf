@@ -32,8 +32,8 @@ resource "aws_iam_role" "github_actions" {
           "token.actions.githubusercontent.com:aud" = "sts.amazonaws.com"
         }
         StringLike = {
-          # このリポジトリの main ブランチおよび PR からのみ assume を許可
-          "token.actions.githubusercontent.com:sub" = "repo:Daichi-Kubota/aws-infra-portfolio:*"
+          # var.github_repository で制限（terraform.tfvars で設定）
+          "token.actions.githubusercontent.com:sub" = "repo:${var.github_repository}:*"
         }
       }
     }]
@@ -87,8 +87,8 @@ resource "aws_iam_role_policy" "github_actions_ci" {
           "s3:ListBucket"
         ]
         Resource = [
-          "arn:aws:s3:::portfolio-tfstate-508251566134",
-          "arn:aws:s3:::portfolio-tfstate-508251566134/*"
+          "arn:aws:s3:::${var.project_name}-tfstate-${data.aws_caller_identity.current.account_id}",
+          "arn:aws:s3:::${var.project_name}-tfstate-${data.aws_caller_identity.current.account_id}/*"
         ]
       }
     ]

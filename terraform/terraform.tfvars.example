@@ -8,3 +8,6 @@ alert_email = "your-email@example.com"
 
 # 取得したドメイン名
 domain_name = "your-domain.dev"
+
+# GitHub OIDC: 認証を許可するリポジトリ（username/repo-name 形式）
+github_repository = "YourGithubUsername/aws-infra-portfolio"

@@ -31,5 +31,5 @@ PUBLIC_IP=$(aws ec2 describe-instances \
   --output text)
 
 echo "起動完了"
-echo "URL: http://$PUBLIC_IP"
-echo "SSH: ssh -i ~/.ssh/portfolio-key ec2-user@$PUBLIC_IP"
+echo "URL: https://infra-portfolio.dev"
+echo "SSM: aws ssm start-session --target $INSTANCE_ID"

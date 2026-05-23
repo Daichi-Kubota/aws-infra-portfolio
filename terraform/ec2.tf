@@ -105,6 +105,16 @@ resource "aws_instance" "web" {
     </html>
     HTML
 
+    # セキュリティヘッダー設定（http レベルで全 server block に継承）
+    cat > /etc/nginx/conf.d/security.conf << 'SECCONF'
+server_tokens off;
+add_header X-Frame-Options "SAMEORIGIN" always;
+add_header X-Content-Type-Options "nosniff" always;
+add_header Referrer-Policy "strict-origin-when-cross-origin" always;
+add_header X-XSS-Protection "1; mode=block" always;
+SECCONF
+    nginx -t && systemctl reload nginx
+
     # CloudWatch AgentにNginxログの収集先を設定
     cat > /opt/aws/amazon-cloudwatch-agent/etc/amazon-cloudwatch-agent.json << 'CWCONFIG'
     {

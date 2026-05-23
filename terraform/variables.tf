@@ -33,3 +33,8 @@ variable "domain_name" {
   default     = "infra-portfolio.dev"
 }
 
+variable "github_repository" {
+  description = "OIDCで認証を許可するGitHubリポジトリ（例: username/repo-name）"
+  type        = string
+}
+

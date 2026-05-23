@@ -12,9 +12,11 @@ provider "aws" {
   region = "ap-northeast-1"
 }
 
+data "aws_caller_identity" "current" {}
+
 # tfstate 保存用 S3 バケット
 resource "aws_s3_bucket" "tfstate" {
-  bucket = "portfolio-tfstate-508251566134"
+  bucket = "portfolio-tfstate-${data.aws_caller_identity.current.account_id}"
 
   # 誤って terraform destroy しても消えないよう保護
   lifecycle {
@@ -55,7 +57,9 @@ resource "aws_s3_bucket_public_access_block" "tfstate" {
   restrict_public_buckets = true
 }
 
-# DynamoDB テーブル：同時 apply による state 破損を防ぐ排他ロック
+# DynamoDB テーブル：AWS SAA「DynamoDBによるstate lock」の知識を示すために残置
+# 実際のロックは main.tf の use_lockfile = true（S3ネイティブ機能）が担う
+# 本番では dynamodb_table か use_lockfile のどちらか一方を採用する
 resource "aws_dynamodb_table" "tfstate_lock" {
   name         = "portfolio-tfstate-lock"
   billing_mode = "PAY_PER_REQUEST"

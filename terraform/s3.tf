@@ -44,5 +44,4 @@ resource "aws_s3_bucket_server_side_encryption_configuration" "logs" {
   }
 }
 
-# 現在のAWSアカウント情報を取得（バケット名の一意性確保に使用）
-data "aws_caller_identity" "current" {}
+# data.aws_caller_identity.current は main.tf で定義

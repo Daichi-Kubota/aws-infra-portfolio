@@ -80,8 +80,8 @@ graph TB
 
 ### 前提条件
 - AWS CLI 設定済み（`aws configure`）
-- Terraform 1.0 以上
-- SSH 鍵ペア生成済み（`~/.ssh/portfolio-key`）
+- Terraform 1.10 以上（`use_lockfile` に必要）
+- Session Manager Plugin インストール済み（`brew install --cask session-manager-plugin`）
 
 ### 手順
 
@@ -109,7 +109,7 @@ cd ..
 bash scripts/setup-ssl.sh
 
 # 6. 動作確認
-curl https://$(terraform output -raw ec2_public_ip)
+curl https://infra-portfolio.dev
 ```
 
 ### EC2へのアクセス（SSH不要）
