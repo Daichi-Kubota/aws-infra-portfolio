@@ -198,12 +198,6 @@ cd terraform && terraform destroy
 
 ---
 
-## 今後の改善案
-
-- [ ] ECSへのコンテナ化移行（Nginxをコンテナで管理）
-
----
-
 ## 完了済み
 
 - [x] VPCから設計・EC2 + Nginx で静的サイト配信
@@ -217,6 +211,7 @@ cd terraform && terraform destroy
 - [x] VPC Flow Logs（全トラフィック記録）
 - [x] CloudTrail（AWS 操作の監査ログ）
 - [x] S3 ログアーカイブ（90日ライフサイクル・暗号化）
+- [x] Docker コンテナ化（Nginx を Docker Compose で管理・本番／開発環境を統一）
 
 ---
 
