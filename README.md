@@ -63,7 +63,8 @@ graph TB
 |------|---------|
 | AWS EC2 t3.micro | 無料枠対象・実務で最も使われるコンピューティング |
 | Amazon Linux 2023 | AWSが公式サポート・セキュリティアップデートが速い |
-| Nginx | Apacheより軽量・静的コンテンツに強い・実務標準 |
+| Docker | 環境差異をなくす・ローカル開発と本番の一致・コンテナ標準 |
+| Nginx (Docker) | Apacheより軽量・静的コンテンツに強い・実務標準 |
 | Terraform | 再現性・差分管理・チーム開発でのデファクトスタンダード |
 | S3 + state locking | チーム開発での tfstate 一元管理・同時 apply による破損防止 |
 | Route53 | AWSネイティブDNS・Terraformで管理できる |
@@ -78,12 +79,28 @@ graph TB
 
 ## 構築手順（再現手順）
 
-### 前提条件
+### ローカル開発（Docker）
+
+```bash
+git clone https://github.com/Daichi-Kubota/aws-infra-portfolio.git
+cd aws-infra-portfolio
+docker compose up
+# → http://localhost:8080
+```
+
+Docker だけで静的サイトの表示確認ができる。AWS アカウント不要。
+
+---
+
+### AWS デプロイ手順
+
+#### 前提条件
 - AWS CLI 設定済み（`aws configure`）
 - Terraform 1.10 以上（`use_lockfile` に必要）
+- Docker インストール済み（EC2 上でコンテナ起動に使用）
 - Session Manager Plugin インストール済み（`brew install --cask session-manager-plugin`）
 
-### 手順
+#### 手順
 
 ```bash
 # 1. リポジトリクローン
