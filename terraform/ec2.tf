@@ -76,46 +76,55 @@ resource "aws_instance" "web" {
   vpc_security_group_ids = [aws_security_group.web.id]
   iam_instance_profile   = aws_iam_instance_profile.ec2_profile.name
 
-  # 起動時に自動実行されるスクリプト（Nginx + CloudWatch Agent インストール）
+  # 起動時に自動実行されるスクリプト（Docker + Nginx + CloudWatch Agent）
   user_data = <<-EOF
     #!/bin/bash
     dnf update -y
-    dnf install -y nginx amazon-cloudwatch-agent
+    dnf install -y amazon-cloudwatch-agent git docker
+
+    # Docker 起動・永続化
+    systemctl start docker
+    systemctl enable docker
+
+    # docker compose v2 plugin インストール
+    mkdir -p /usr/local/lib/docker/cli-plugins
+    curl -fsSL "https://github.com/docker/compose/releases/download/v2.24.5/docker-compose-linux-x86_64" \
+      -o /usr/local/lib/docker/cli-plugins/docker-compose
+    chmod +x /usr/local/lib/docker/cli-plugins/docker-compose
+
+    # CloudWatch Agent が読むログディレクトリを作成
+    mkdir -p /var/log/docker-nginx
+
+    # リポジトリをクローンして Docker コンテナ起動（port 8080 で待機）
+    git clone https://github.com/Daichi-Kubota/aws-infra-portfolio.git /opt/portfolio
+    cd /opt/portfolio
+    docker compose -f docker-compose.yml -f docker-compose.prod.yml up -d --build
+
+    # Host nginx：SSL 終端 + Docker コンテナへのリバースプロキシ
+    # セキュリティヘッダーはコンテナ内の nginx.conf が設定するため、ここでは不要
+    dnf install -y nginx
+
+    cat > /etc/nginx/conf.d/portfolio.conf << 'PROXYCONF'
+server {
+    listen 80;
+    server_name _;
+    server_tokens off;
+
+    location / {
+        proxy_pass         http://localhost:8080;
+        proxy_http_version 1.1;
+        proxy_set_header   Host              $host;
+        proxy_set_header   X-Real-IP         $remote_addr;
+        proxy_set_header   X-Forwarded-For   $proxy_add_x_forwarded_for;
+        proxy_set_header   X-Forwarded-Proto $scheme;
+    }
+}
+PROXYCONF
+
     systemctl start nginx
     systemctl enable nginx
 
-    # ポートフォリオ用のHTMLページを作成
-    cat > /usr/share/nginx/html/index.html << 'HTML'
-    <!DOCTYPE html>
-    <html>
-    <head>
-      <meta charset="UTF-8">
-      <title>Portfolio - AWS Infra</title>
-      <style>
-        body { font-family: sans-serif; background: #0d1117; color: #c9d1d9; text-align: center; padding: 50px; }
-        h1 { color: #58a6ff; }
-        p { color: #8b949e; }
-      </style>
-    </head>
-    <body>
-      <h1>AWS Infrastructure Portfolio</h1>
-      <p>Daichi Kubota</p>
-      <p>EC2 + Nginx + VPC + Terraform</p>
-    </body>
-    </html>
-    HTML
-
-    # セキュリティヘッダー設定（http レベルで全 server block に継承）
-    cat > /etc/nginx/conf.d/security.conf << 'SECCONF'
-server_tokens off;
-add_header X-Frame-Options "SAMEORIGIN" always;
-add_header X-Content-Type-Options "nosniff" always;
-add_header Referrer-Policy "strict-origin-when-cross-origin" always;
-add_header X-XSS-Protection "1; mode=block" always;
-SECCONF
-    nginx -t && systemctl reload nginx
-
-    # CloudWatch AgentにNginxログの収集先を設定
+    # CloudWatch Agent：Docker コンテナの Nginx ログ（ホストにマウント済み）を収集
     cat > /opt/aws/amazon-cloudwatch-agent/etc/amazon-cloudwatch-agent.json << 'CWCONFIG'
     {
       "logs": {
@@ -123,13 +132,13 @@ SECCONF
           "files": {
             "collect_list": [
               {
-                "file_path": "/var/log/nginx/access.log",
+                "file_path": "/var/log/docker-nginx/access.log",
                 "log_group_name": "/${var.project_name}/nginx/access",
                 "log_stream_name": "{instance_id}",
                 "timezone": "UTC"
               },
               {
-                "file_path": "/var/log/nginx/error.log",
+                "file_path": "/var/log/docker-nginx/error.log",
                 "log_group_name": "/${var.project_name}/nginx/error",
                 "log_stream_name": "{instance_id}",
                 "timezone": "UTC"

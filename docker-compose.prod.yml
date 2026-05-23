@@ -1,0 +1,8 @@
+# EC2本番用オーバーライド: docker compose -f docker-compose.yml -f docker-compose.prod.yml up -d
+services:
+  nginx:
+    ports:
+      - "8080:80"
+    volumes:
+      - /var/log/docker-nginx:/var/log/nginx  # CloudWatch Agent がホストから読む
+    restart: always
