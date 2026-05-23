@@ -1,14 +1,3 @@
-# SSH公開鍵をAWSに登録
-resource "aws_key_pair" "portfolio" {
-  key_name   = "${var.project_name}-key"
-  public_key = var.ssh_public_key != "" ? var.ssh_public_key : file("~/.ssh/portfolio-key.pub")
-
-  tags = {
-    Name    = "${var.project_name}-key"
-    Project = var.project_name
-  }
-}
-
 # IAM Role：EC2がCloudWatch・S3にアクセスするための「社員証」
 resource "aws_iam_role" "ec2_role" {
   name = "${var.project_name}-ec2-role"
@@ -33,6 +22,13 @@ resource "aws_iam_role" "ec2_role" {
 resource "aws_iam_role_policy_attachment" "cloudwatch" {
   role       = aws_iam_role.ec2_role.name
   policy_arn = "arn:aws:iam::aws:policy/CloudWatchAgentServerPolicy"
+}
+
+# SSM Session Manager：SSH不要でEC2にセキュアアクセスするために必要
+# AmazonSSMManagedInstanceCore = SSM Agent がAWSと通信するための最小権限
+resource "aws_iam_role_policy_attachment" "ssm" {
+  role       = aws_iam_role.ec2_role.name
+  policy_arn = "arn:aws:iam::aws:policy/AmazonSSMManagedInstanceCore"
 }
 
 # S3：ログバケット内のnginxパスへのPutObjectのみ許可（最小権限の原則）
@@ -78,7 +74,6 @@ resource "aws_instance" "web" {
   instance_type          = "t3.micro" # 無料枠対象
   subnet_id              = aws_subnet.public.id
   vpc_security_group_ids = [aws_security_group.web.id]
-  key_name               = aws_key_pair.portfolio.key_name
   iam_instance_profile   = aws_iam_instance_profile.ec2_profile.name
 
   # 起動時に自動実行されるスクリプト（Nginx + CloudWatch Agent インストール）
@@ -109,6 +104,16 @@ resource "aws_instance" "web" {
     </body>
     </html>
     HTML
+
+    # セキュリティヘッダー設定（http レベルで全 server block に継承）
+    cat > /etc/nginx/conf.d/security.conf << 'SECCONF'
+server_tokens off;
+add_header X-Frame-Options "SAMEORIGIN" always;
+add_header X-Content-Type-Options "nosniff" always;
+add_header Referrer-Policy "strict-origin-when-cross-origin" always;
+add_header X-XSS-Protection "1; mode=block" always;
+SECCONF
+    nginx -t && systemctl reload nginx
 
     # CloudWatch AgentにNginxログの収集先を設定
     cat > /opt/aws/amazon-cloudwatch-agent/etc/amazon-cloudwatch-agent.json << 'CWCONFIG'

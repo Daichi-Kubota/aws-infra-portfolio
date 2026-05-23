@@ -14,13 +14,13 @@ output "ec2_public_ip" {
 }
 
 output "site_url" {
-  description = "サイトURL"
-  value       = "http://${aws_eip.web.public_ip}"
+  description = "サイトURL（HTTPSはhttps_urlを参照）"
+  value       = "https://${var.domain_name}"
 }
 
-output "ssh_command" {
-  description = "SSH接続コマンド"
-  value       = "ssh -i ~/.ssh/portfolio-key ec2-user@${aws_eip.web.public_ip}"
+output "ssm_command" {
+  description = "SSM Session Manager でのEC2アクセスコマンド（SSH不要）"
+  value       = "aws ssm start-session --target ${aws_instance.web.id}"
 }
 
 output "s3_bucket_name" {

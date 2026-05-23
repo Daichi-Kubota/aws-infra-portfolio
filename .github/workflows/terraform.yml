@@ -7,8 +7,12 @@ on:
     branches: [main]
 
 env:
-  TF_VERSION: "1.5.0"
+  TF_VERSION: "1.10.3"
   WORKING_DIR: terraform
+  AWS_REGION: ap-northeast-1
+  # IAM Role ARN は GitHub リポジトリ変数 vars.IAM_ROLE_ARN に設定する
+  # 設定場所: Settings > Secrets and variables > Variables > New repository variable
+  # 値の例: arn:aws:iam::123456789012:role/portfolio-github-actions-role
 
 jobs:
   fmt:
@@ -29,9 +33,8 @@ jobs:
     name: Validate
     runs-on: ubuntu-latest
     env:
-      TF_VAR_my_ip: ${{ secrets.TF_VAR_MY_IP }}
       TF_VAR_alert_email: ${{ secrets.TF_VAR_ALERT_EMAIL }}
-      TF_VAR_ssh_public_key: ${{ secrets.TF_VAR_SSH_PUBLIC_KEY }}
+      TF_VAR_github_repository: ${{ github.repository }}
     steps:
       - uses: actions/checkout@v4
 
@@ -47,25 +50,45 @@ jobs:
         run: terraform validate
         working-directory: ${{ env.WORKING_DIR }}
 
+  security:
+    name: Security Scan
+    runs-on: ubuntu-latest
+    needs: [fmt, validate]
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: tfsec
+        uses: aquasecurity/tfsec-action@v1.0.0
+        with:
+          working_directory: ${{ env.WORKING_DIR }}
+          soft_fail: true
+
   plan:
     name: Plan
     runs-on: ubuntu-latest
     needs: [fmt, validate]
     if: github.event_name == 'pull_request'
     permissions:
+      contents: read
       pull-requests: write
+      # OIDC トークン取得に必要
+      id-token: write
     env:
-      AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-      AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-      TF_VAR_my_ip: ${{ secrets.TF_VAR_MY_IP }}
       TF_VAR_alert_email: ${{ secrets.TF_VAR_ALERT_EMAIL }}
-      TF_VAR_ssh_public_key: ${{ secrets.TF_VAR_SSH_PUBLIC_KEY }}
+      TF_VAR_github_repository: ${{ github.repository }}
     steps:
       - uses: actions/checkout@v4
 
       - uses: hashicorp/setup-terraform@v3
         with:
           terraform_version: ${{ env.TF_VERSION }}
+
+      # OIDC で IAM Role を assume（アクセスキー不要）
+      - name: Configure AWS credentials via OIDC
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ vars.IAM_ROLE_ARN }}
+          aws-region: ${{ env.AWS_REGION }}
 
       - name: terraform init
         run: terraform init

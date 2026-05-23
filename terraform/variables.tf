@@ -22,11 +22,6 @@ variable "public_subnet_cidr" {
   default     = "10.0.1.0/24"
 }
 
-variable "my_ip" {
-  description = "SSH接続を許可する自分のIPアドレス（例: 203.0.113.1/32）"
-  type        = string
-}
-
 variable "alert_email" {
   description = "CloudWatchアラートの通知先メールアドレス"
   type        = string
@@ -38,8 +33,8 @@ variable "domain_name" {
   default     = "infra-portfolio.dev"
 }
 
-variable "ssh_public_key" {
-  description = "EC2に登録するSSH公開鍵（CI環境ではSecretから渡す）"
+variable "github_repository" {
+  description = "OIDCで認証を許可するGitHubリポジトリ（例: username/repo-name）"
   type        = string
-  default     = ""
 }
+
