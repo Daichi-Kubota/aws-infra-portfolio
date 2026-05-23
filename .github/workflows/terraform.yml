@@ -9,6 +9,9 @@ on:
 env:
   TF_VERSION: "1.5.0"
   WORKING_DIR: terraform
+  AWS_REGION: ap-northeast-1
+  # OIDC で assume する IAM Role ARN（長期クレデンシャル不要）
+  IAM_ROLE_ARN: arn:aws:iam::508251566134:role/portfolio-github-actions-role
 
 jobs:
   fmt:
@@ -53,10 +56,11 @@ jobs:
     needs: [fmt, validate]
     if: github.event_name == 'pull_request'
     permissions:
+      contents: read
       pull-requests: write
+      # OIDC トークン取得に必要
+      id-token: write
     env:
-      AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-      AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
       TF_VAR_my_ip: ${{ secrets.TF_VAR_MY_IP }}
       TF_VAR_alert_email: ${{ secrets.TF_VAR_ALERT_EMAIL }}
       TF_VAR_ssh_public_key: ${{ secrets.TF_VAR_SSH_PUBLIC_KEY }}
@@ -66,6 +70,13 @@ jobs:
       - uses: hashicorp/setup-terraform@v3
         with:
           terraform_version: ${{ env.TF_VERSION }}
+
+      # OIDC で IAM Role を assume（アクセスキー不要）
+      - name: Configure AWS credentials via OIDC
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ env.IAM_ROLE_ARN }}
+          aws-region: ${{ env.AWS_REGION }}
 
       - name: terraform init
         run: terraform init
