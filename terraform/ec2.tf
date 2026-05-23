@@ -106,7 +106,7 @@ resource "aws_instance" "web" {
 
     cat > /etc/nginx/conf.d/portfolio.conf << 'PROXYCONF'
 server {
-    listen 80;
+    listen 80 default_server;
     server_name _;
     server_tokens off;
 
@@ -120,6 +120,9 @@ server {
     }
 }
 PROXYCONF
+
+    # Amazon Linux 2023のnginx.confにある既定のサーバーブロックを削除（競合防止）
+    sed -i '37,53d' /etc/nginx/nginx.conf
 
     systemctl start nginx
     systemctl enable nginx
