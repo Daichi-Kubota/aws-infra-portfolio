@@ -173,6 +173,18 @@ cd terraform && terraform destroy
 **解決:** SSH で入って `sudo systemctl restart amazon-ssm-agent` を実行  
 **教訓:** IAM 変更は即時反映されるが、Agent 側のポーリングサイクルがある
 
+### 5. `.dockerignore` に `nginx.conf` を記載して Docker ビルドが失敗した
+**問題:** `docker compose up --build` で `"/nginx.conf": not found` エラー  
+**原因:** `.dockerignore` に `nginx.conf` を誤って記載していたため、ビルドコンテキストから除外されていた。`Dockerfile` は `COPY nginx.conf ...` しているのにファイルが存在しない状態になっていた  
+**解決:** `.dockerignore` から `nginx.conf` を削除  
+**教訓:** `.dockerignore` はコピーしたいファイルを誤って除外していないか必ず確認する
+
+### 6. host nginx と Amazon Linux 2023 のデフォルト設定が競合した
+**問題:** Docker コンテナへのリバースプロキシを設定したのに「Welcome to nginx!」が表示される  
+**原因:** Amazon Linux 2023 の nginx パッケージは `/etc/nginx/nginx.conf` 内にデフォルトのサーバーブロック（`server_name _; listen 80;`）を持つ。自分の `portfolio.conf` も同じ `server_name _` を使っているため競合が発生し、先に読み込まれる nginx.conf 側が優先された  
+**解決:** `nginx -t` の警告 `conflicting server name "_" on 0.0.0.0:80, ignored` から競合を特定し、nginx.conf のデフォルトブロックを削除  
+**教訓:** nginx は同じ `server_name` が複数あると先にロードされた方を優先する。パッケージインストール後はデフォルト設定との競合を確認する
+
 ---
 
 ## 学んだこと
