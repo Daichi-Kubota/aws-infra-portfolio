@@ -32,7 +32,6 @@ jobs:
     name: Validate
     runs-on: ubuntu-latest
     env:
-      TF_VAR_my_ip: ${{ secrets.TF_VAR_MY_IP }}
       TF_VAR_alert_email: ${{ secrets.TF_VAR_ALERT_EMAIL }}
       TF_VAR_ssh_public_key: ${{ secrets.TF_VAR_SSH_PUBLIC_KEY }}
     steps:
@@ -61,7 +60,6 @@ jobs:
       # OIDC トークン取得に必要
       id-token: write
     env:
-      TF_VAR_my_ip: ${{ secrets.TF_VAR_MY_IP }}
       TF_VAR_alert_email: ${{ secrets.TF_VAR_ALERT_EMAIL }}
       TF_VAR_ssh_public_key: ${{ secrets.TF_VAR_SSH_PUBLIC_KEY }}
     steps:

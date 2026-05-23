@@ -22,11 +22,6 @@ variable "public_subnet_cidr" {
   default     = "10.0.1.0/24"
 }
 
-variable "my_ip" {
-  description = "SSH接続を許可する自分のIPアドレス（例: 203.0.113.1/32）"
-  type        = string
-}
-
 variable "alert_email" {
   description = "CloudWatchアラートの通知先メールアドレス"
   type        = string

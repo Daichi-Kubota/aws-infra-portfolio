@@ -3,9 +3,6 @@ project_name       = "portfolio"
 vpc_cidr           = "10.0.0.0/16"
 public_subnet_cidr = "10.0.1.0/24"
 
-# curl -s https://checkip.amazonaws.com で確認して /32 を付ける
-my_ip = "xxx.xxx.xxx.xxx/32"
-
 # CloudWatch アラートの通知先
 alert_email = "your-email@example.com"
 

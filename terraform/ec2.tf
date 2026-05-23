@@ -35,6 +35,13 @@ resource "aws_iam_role_policy_attachment" "cloudwatch" {
   policy_arn = "arn:aws:iam::aws:policy/CloudWatchAgentServerPolicy"
 }
 
+# SSM Session Manager：SSH不要でEC2にセキュアアクセスするために必要
+# AmazonSSMManagedInstanceCore = SSM Agent がAWSと通信するための最小権限
+resource "aws_iam_role_policy_attachment" "ssm" {
+  role       = aws_iam_role.ec2_role.name
+  policy_arn = "arn:aws:iam::aws:policy/AmazonSSMManagedInstanceCore"
+}
+
 # S3：ログバケット内のnginxパスへのPutObjectのみ許可（最小権限の原則）
 resource "aws_iam_role_policy" "s3_logs" {
   name = "${var.project_name}-s3-logs-policy"
