@@ -122,8 +122,31 @@ server {
 }
 PROXYCONF
 
-    # Amazon Linux 2023のnginx.confにある既定のサーバーブロックを削除（競合防止）
-    sed -i '37,53d' /etc/nginx/nginx.conf
+    # nginx.conf をシンプルな構成に上書き（デフォルトのサーバーブロックを排除）
+    # sed による行番号指定削除はnginxバージョンアップで壊れるため、丸ごと書き換える
+    cat > /etc/nginx/nginx.conf << 'NGINXCONF'
+user nginx;
+worker_processes auto;
+error_log /var/log/nginx/error.log;
+pid /run/nginx.pid;
+include /usr/share/nginx/modules/*.conf;
+
+events {
+    worker_connections 1024;
+}
+
+http {
+    log_format  main  '$remote_addr - $remote_user [$time_local] "$request" '
+                      '$status $body_bytes_sent "$http_referer" '
+                      '"$http_user_agent" "$http_x_forwarded_for"';
+    access_log  /var/log/nginx/access.log  main;
+    sendfile            on;
+    keepalive_timeout   65;
+    include             /etc/nginx/mime.types;
+    default_type        application/octet-stream;
+    include             /etc/nginx/conf.d/*.conf;
+}
+NGINXCONF
 
     systemctl start nginx
     systemctl enable nginx
