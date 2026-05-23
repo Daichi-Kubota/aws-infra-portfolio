@@ -182,8 +182,8 @@ cd terraform && terraform destroy
 ### 6. host nginx と Amazon Linux 2023 のデフォルト設定が競合した
 **問題:** Docker コンテナへのリバースプロキシを設定したのに「Welcome to nginx!」が表示される  
 **原因:** Amazon Linux 2023 の nginx パッケージは `/etc/nginx/nginx.conf` 内にデフォルトのサーバーブロック（`server_name _; listen 80;`）を持つ。自分の `portfolio.conf` も同じ `server_name _` を使っているため競合が発生し、先に読み込まれる nginx.conf 側が優先された  
-**解決:** `nginx -t` の警告 `conflicting server name "_" on 0.0.0.0:80, ignored` から競合を特定し、nginx.conf のデフォルトブロックを削除  
-**教訓:** nginx は同じ `server_name` が複数あると先にロードされた方を優先する。パッケージインストール後はデフォルト設定との競合を確認する
+**解決:** `nginx -t` の警告 `conflicting server name "_" on 0.0.0.0:80, ignored` から競合を特定。最初は `sed -i '37,53d'` で該当行を削除したが、nginx バージョンアップで行番号がズレると壊れることに気づき、nginx.conf を丸ごと書き換える方式に変更した  
+**教訓:** nginx は同じ `server_name` が複数あると先にロードされた方を優先する。行番号ハードコードによる削除はバージョンアップで破綻するため、設定ファイルを上書きする方式が安全
 
 ---
 
