@@ -121,6 +121,7 @@ main {
 .box-text {
   line-height: 1.9;
   margin-top: 1em;
+  text-align: center;
 }
 
 .box-text + .box-text {
@@ -232,6 +233,7 @@ main {
   font-size: 0.95rem;
   color: #3a3a3a;
   line-height: 1.9;
+  text-align: center;
 }
 
 .article-body p {
