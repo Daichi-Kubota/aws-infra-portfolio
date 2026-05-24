@@ -7,6 +7,56 @@ Terraform で全リソースをコード化し、セキュリティ・監視・C
 
 ---
 
+## ファイル構成
+
+```
+.
+├── docker-compose.yml              # Nginx コンテナ設定
+├── docker-compose.prod.yml         # 本番用オーバーライド
+│
+├── nginx/                          # コンテンツ・Web サーバー設定
+│   ├── Dockerfile
+│   ├── nginx.conf
+│   ├── index.html
+│   ├── style.css
+│   └── interests/                  # サブページ
+│       ├── curry.html
+│       ├── live.html
+│       ├── taiko.html
+│       └── yakuto.html
+│
+├── terraform/                      # インフラ定義（全リソース IaC）
+│   ├── main.tf                     # provider, backend
+│   ├── vpc.tf                      # VPC, Subnet, IGW, Route Table
+│   ├── ec2.tf                      # EC2, IAM Role, EIP
+│   ├── security.tf                 # Security Group
+│   ├── s3.tf                       # ログ・tfstate 用バケット
+│   ├── route53.tf                  # DNS, カスタムドメイン
+│   ├── cloudwatch.tf               # Logs, Alarm, SNS, Health Check
+│   ├── cloudtrail.tf               # 操作ログ監査
+│   ├── flow-logs.tf                # VPC Flow Logs
+│   ├── oidc.tf                     # GitHub Actions OIDC 認証
+│   ├── outputs.tf
+│   ├── variables.tf
+│   ├── terraform.tfvars.example
+│   └── backend-bootstrap/          # tfstate 管理用 S3 バケット初期構築
+│       └── main.tf
+│
+├── scripts/
+│   ├── deploy.sh                   # コンテンツ更新（git pull + docker compose）
+│   ├── setup-ssl.sh                # Let's Encrypt SSL 証明書取得・自動更新設定
+│   ├── ssm-session.sh              # SSM Session Manager 接続
+│   ├── backup-logs.sh              # Nginx ログを S3 にバックアップ
+│   ├── start-ec2.sh                # EC2 起動
+│   └── stop-ec2.sh                 # EC2 停止（コスト節約）
+│
+└── docs/
+    ├── ARCHITECTURE.md             # アーキテクチャ詳細
+    └── TROUBLESHOOTING.md          # トラブルシューティング集
+```
+
+---
+
 ## 構成図
 
 ```mermaid
