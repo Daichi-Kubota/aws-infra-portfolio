@@ -60,3 +60,89 @@ resource "aws_cloudwatch_metric_alarm" "cpu_high" {
     Project = var.project_name
   }
 }
+
+# ディスク使用率が85%超過したらアラート発火
+# CloudWatch Agent がカスタムメトリクスとして送信する
+resource "aws_cloudwatch_metric_alarm" "disk_high" {
+  alarm_name          = "${var.project_name}-disk-high"
+  comparison_operator = "GreaterThanThreshold"
+  evaluation_periods  = 1
+  metric_name         = "disk_used_percent"
+  namespace           = "CWAgent"
+  period              = 300
+  statistic           = "Average"
+  threshold           = 85
+  alarm_description   = "ディスク使用率が85%を超えました（ログ肥大化の可能性）"
+  alarm_actions       = [aws_sns_topic.alerts.arn]
+  ok_actions          = [aws_sns_topic.alerts.arn]
+
+  dimensions = {
+    InstanceId = aws_instance.web.id
+    path       = "/"
+    device     = "nvme0n1p1"
+    fstype     = "xfs"
+  }
+
+  tags = {
+    Name    = "${var.project_name}-disk-alarm"
+    Project = var.project_name
+  }
+}
+
+# Route53 ヘルスチェック：外形監視（HTTPSで実際にサイトが応答するか確認）
+resource "aws_route53_health_check" "web" {
+  fqdn              = var.domain_name
+  port              = 443
+  type              = "HTTPS"
+  resource_path     = "/"
+  failure_threshold = 3  # 3回連続失敗でアラート
+  request_interval  = 30 # 30秒ごとにチェック
+
+  tags = {
+    Name    = "${var.project_name}-health-check"
+    Project = var.project_name
+  }
+}
+
+# ヘルスチェック失敗時にSNS通知（us-east-1固定：Route53の仕様）
+resource "aws_cloudwatch_metric_alarm" "health_check" {
+  provider            = aws.us_east_1
+  alarm_name          = "${var.project_name}-health-check-failed"
+  comparison_operator = "LessThanThreshold"
+  evaluation_periods  = 1
+  metric_name         = "HealthCheckStatus"
+  namespace           = "AWS/Route53"
+  period              = 60
+  statistic           = "Minimum"
+  threshold           = 1
+  alarm_description   = "サイトが応答していません（外形監視）"
+  alarm_actions       = [aws_sns_topic.alerts_us_east_1.arn]
+  ok_actions          = [aws_sns_topic.alerts_us_east_1.arn]
+
+  dimensions = {
+    HealthCheckId = aws_route53_health_check.web.id
+  }
+
+  tags = {
+    Name    = "${var.project_name}-health-check-alarm"
+    Project = var.project_name
+  }
+}
+
+# Route53ヘルスチェックのアラームはus-east-1に作る必要がある（AWSの仕様）
+resource "aws_sns_topic" "alerts_us_east_1" {
+  provider = aws.us_east_1
+  name     = "${var.project_name}-alerts-us-east-1"
+
+  tags = {
+    Name    = "${var.project_name}-alerts-us-east-1"
+    Project = var.project_name
+  }
+}
+
+resource "aws_sns_topic_subscription" "email_us_east_1" {
+  provider  = aws.us_east_1
+  topic_arn = aws_sns_topic.alerts_us_east_1.arn
+  protocol  = "email"
+  endpoint  = var.alert_email
+}

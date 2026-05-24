@@ -154,6 +154,14 @@ NGINXCONF
     # CloudWatch Agent：Docker コンテナの Nginx ログ（ホストにマウント済み）を収集
     cat > /opt/aws/amazon-cloudwatch-agent/etc/amazon-cloudwatch-agent.json << 'CWCONFIG'
     {
+      "metrics": {
+        "metrics_collected": {
+          "disk": {
+            "measurement": ["disk_used_percent"],
+            "resources": ["/"]
+          }
+        }
+      },
       "logs": {
         "logs_collected": {
           "files": {
@@ -183,6 +191,12 @@ NGINXCONF
       -c file:/opt/aws/amazon-cloudwatch-agent/etc/amazon-cloudwatch-agent.json \
       -s
   EOF
+
+  # AMIとuser_dataの変更でEC2が意図せず置換されるのを防ぐ
+  # AMIはmost_recent=trueのため新AMIリリース時に差分が出るが、置換はしない
+  lifecycle {
+    ignore_changes = [ami, user_data]
+  }
 
   # IMDSv2を強制：SSRF攻撃によるメタデータ窃取を防ぐ
   metadata_options {
