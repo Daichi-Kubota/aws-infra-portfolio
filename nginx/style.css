@@ -118,6 +118,8 @@ main {
   line-height: 2;
 }
 
+.yakuzaishi-box p + p { margin-top: 1.1em; }
+
 /* ── INTERESTSカード ── */
 .interest-grid {
   display: grid;
