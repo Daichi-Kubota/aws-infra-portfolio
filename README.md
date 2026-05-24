@@ -224,6 +224,10 @@ cd terraform && terraform destroy
 - [x] CloudTrail（AWS 操作の監査ログ）
 - [x] S3 ログアーカイブ（90日ライフサイクル・暗号化）
 - [x] Docker コンテナ化（Nginx を Docker Compose で管理・本番／開発環境を統一）
+- [x] Route53 Health Check による外形監視（HTTPS 応答を 30 秒ごとに確認・失敗時 SNS 通知）
+- [x] ディスク使用率監視（CloudWatch Agent カスタムメトリクス・85% 超過でアラート）
+- [x] EC2 AMI・user_data の意図しない置換防止（`lifecycle { ignore_changes }` 設定）
+- [x] デプロイスクリプト（`scripts/deploy.sh`・SSM 経由で EC2 に入らずコンテンツ更新可能）
 
 ---
 
@@ -235,8 +239,10 @@ cd terraform && terraform destroy
 | S3（ログ + tfstate） | 約 $0.01 |
 | CloudWatch | 無料枠内 |
 | Route53 ホストゾーン | $0.50 |
+| Route53 Health Check | $0.50 |
 | CloudTrail | 無料（管理イベント・最初の1トレイル） |
 | VPC Flow Logs | 約 $0.05 |
-| **合計** | **約 $0.56 / 月** |
+| CloudWatch カスタムメトリクス（disk） | 約 $0.30 |
+| **合計** | **約 $1.36 / 月** |
 
 不使用時は `scripts/stop-ec2.sh` でEC2を停止してコストを抑制。

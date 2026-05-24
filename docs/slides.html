@@ -1,0 +1,420 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AWS Infrastructure Portfolio</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&family=Noto+Sans+JP:wght@300;400;700&display=swap');
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg:      #0a0a0a;
+      --surface: #111111;
+      --border:  #222222;
+      --text:    #e8e8e8;
+      --muted:   #666666;
+      --accent:  #4f8ef7;
+      --accent2: #a78bfa;
+    }
+
+    html, body {
+      height: 100%;
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'Inter', 'Noto Sans JP', sans-serif;
+      overflow: hidden;
+    }
+
+    /* ── スライドコンテナ ── */
+    .deck {
+      width: 100vw;
+      height: 100vh;
+      position: relative;
+    }
+
+    .slide {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      padding: 72px 96px;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.5s ease;
+    }
+    .slide.active {
+      opacity: 1;
+      pointer-events: all;
+    }
+
+    /* ── ナビゲーション ── */
+    .nav {
+      position: fixed;
+      bottom: 40px;
+      left: 50%;
+      transform: translateX(-50%);
+      display: flex;
+      align-items: center;
+      gap: 24px;
+      z-index: 100;
+    }
+    .nav button {
+      background: none;
+      border: 1px solid var(--border);
+      color: var(--muted);
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      cursor: pointer;
+      font-size: 16px;
+      transition: border-color 0.2s, color 0.2s;
+    }
+    .nav button:hover { border-color: var(--accent); color: var(--accent); }
+    .dots {
+      display: flex;
+      gap: 8px;
+    }
+    .dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: var(--border);
+      transition: background 0.3s, transform 0.3s;
+      cursor: pointer;
+    }
+    .dot.active {
+      background: var(--accent);
+      transform: scale(1.4);
+    }
+
+    /* ── スライド番号 ── */
+    .slide-num {
+      position: fixed;
+      top: 40px;
+      right: 48px;
+      font-size: 12px;
+      color: var(--muted);
+      letter-spacing: 0.1em;
+    }
+
+    /* ────────────────────────────
+       スライド 1: タイトル
+    ──────────────────────────── */
+    .s1 { }
+
+    .s1 .label {
+      font-size: 11px;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--accent);
+      margin-bottom: 28px;
+    }
+    .s1 h1 {
+      font-size: clamp(36px, 5vw, 64px);
+      font-weight: 700;
+      line-height: 1.1;
+      letter-spacing: -0.02em;
+      margin-bottom: 24px;
+    }
+    .s1 h1 span {
+      background: linear-gradient(135deg, var(--accent), var(--accent2));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    .s1 .sub {
+      font-size: 16px;
+      color: var(--muted);
+      font-weight: 300;
+      line-height: 1.7;
+      max-width: 520px;
+    }
+    .s1 .author {
+      margin-top: 56px;
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+    .s1 .author-line {
+      width: 32px;
+      height: 1px;
+      background: var(--border);
+    }
+    .s1 .author-name {
+      font-size: 13px;
+      color: var(--muted);
+      letter-spacing: 0.05em;
+    }
+
+    /* ────────────────────────────
+       スライド 2: アーキテクチャ
+    ──────────────────────────── */
+    .s2 .section-label {
+      font-size: 11px;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--accent);
+      margin-bottom: 20px;
+    }
+    .s2 h2 {
+      font-size: clamp(24px, 3vw, 40px);
+      font-weight: 700;
+      letter-spacing: -0.02em;
+      margin-bottom: 48px;
+    }
+
+    .arch-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 16px;
+    }
+    .arch-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 24px 20px;
+      transition: border-color 0.2s;
+    }
+    .arch-card:hover { border-color: #333; }
+    .arch-card .icon {
+      font-size: 22px;
+      margin-bottom: 12px;
+    }
+    .arch-card .card-title {
+      font-size: 13px;
+      font-weight: 600;
+      margin-bottom: 8px;
+      color: var(--text);
+    }
+    .arch-card .card-desc {
+      font-size: 12px;
+      color: var(--muted);
+      line-height: 1.6;
+    }
+    .arch-card .tag {
+      display: inline-block;
+      margin-top: 12px;
+      font-size: 10px;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      padding: 3px 8px;
+      border-radius: 4px;
+      background: rgba(79, 142, 247, 0.1);
+      color: var(--accent);
+    }
+
+    /* ────────────────────────────
+       スライド 3: こだわりポイント
+    ──────────────────────────── */
+    .s3 .section-label {
+      font-size: 11px;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--accent);
+      margin-bottom: 20px;
+    }
+    .s3 h2 {
+      font-size: clamp(24px, 3vw, 40px);
+      font-weight: 700;
+      letter-spacing: -0.02em;
+      margin-bottom: 48px;
+    }
+
+    .points {
+      display: flex;
+      flex-direction: column;
+      gap: 0;
+    }
+    .point-row {
+      display: grid;
+      grid-template-columns: 28px 1fr 1fr;
+      gap: 24px;
+      align-items: start;
+      padding: 24px 0;
+      border-bottom: 1px solid var(--border);
+    }
+    .point-row:last-child { border-bottom: none; }
+    .point-num {
+      font-size: 11px;
+      color: var(--accent);
+      font-weight: 600;
+      padding-top: 2px;
+      letter-spacing: 0.05em;
+    }
+    .point-title {
+      font-size: 14px;
+      font-weight: 600;
+      line-height: 1.4;
+    }
+    .point-body {
+      font-size: 13px;
+      color: var(--muted);
+      line-height: 1.7;
+    }
+
+    /* ── キーボードヒント ── */
+    .hint {
+      position: fixed;
+      bottom: 40px;
+      right: 48px;
+      font-size: 11px;
+      color: #333;
+    }
+
+    /* ── グリッド線（装飾） ── */
+    .grid-line {
+      position: fixed;
+      top: 0; bottom: 0;
+      left: 48px;
+      width: 1px;
+      background: var(--border);
+      opacity: 0.4;
+    }
+    .grid-line-r {
+      position: fixed;
+      top: 0; bottom: 0;
+      right: 48px;
+      width: 1px;
+      background: var(--border);
+      opacity: 0.4;
+    }
+  </style>
+</head>
+<body>
+
+<div class="grid-line"></div>
+<div class="grid-line-r"></div>
+
+<div class="slide-num" id="slideNum">01 / 03</div>
+
+<div class="deck" id="deck">
+
+  <!-- ── Slide 1 ── -->
+  <section class="slide s1 active">
+    <div class="label">Portfolio · 2025</div>
+    <h1>AWS<br><span>Infrastructure</span><br>Portfolio</h1>
+    <p class="sub">
+      Terraform × GitHub Actions × セキュリティ設計<br>
+      IAC・CI/CD・監視をワンパッケージで実装
+    </p>
+    <div class="author">
+      <div class="author-line"></div>
+      <div class="author-name">Daichi Kubota</div>
+    </div>
+  </section>
+
+  <!-- ── Slide 2 ── -->
+  <section class="slide s2">
+    <div class="section-label">Architecture</div>
+    <h2>構成要素</h2>
+    <div class="arch-grid">
+      <div class="arch-card">
+        <div class="icon">🌐</div>
+        <div class="card-title">ネットワーク</div>
+        <div class="card-desc">VPC / サブネット / IGW / Route53 でパブリックアクセスを構築</div>
+        <span class="tag">Networking</span>
+      </div>
+      <div class="arch-card">
+        <div class="icon">🖥</div>
+        <div class="card-title">コンピューティング</div>
+        <div class="card-desc">EC2 (t3.micro) + Nginx + Elastic IP で静的サイトをホスト</div>
+        <span class="tag">Compute</span>
+      </div>
+      <div class="arch-card">
+        <div class="icon">🔐</div>
+        <div class="card-title">セキュリティ</div>
+        <div class="card-desc">IMDSv2 強制 · SSH 廃止 · SSM Session Manager でゼロポート運用</div>
+        <span class="tag">Security</span>
+      </div>
+      <div class="arch-card">
+        <div class="icon">🔄</div>
+        <div class="card-title">CI/CD</div>
+        <div class="card-desc">GitHub Actions + OIDC でアクセスキー不要の自動 terraform plan</div>
+        <span class="tag">Automation</span>
+      </div>
+      <div class="arch-card">
+        <div class="icon">📊</div>
+        <div class="card-title">監視・ログ</div>
+        <div class="card-desc">CloudWatch · VPC Flow Logs · CloudTrail でフルスタック可観測性</div>
+        <span class="tag">Observability</span>
+      </div>
+      <div class="arch-card">
+        <div class="icon">🗂</div>
+        <div class="card-title">IaC</div>
+        <div class="card-desc">全リソースを Terraform で管理。S3 リモート State + ロック機構</div>
+        <span class="tag">Terraform</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── Slide 3 ── -->
+  <section class="slide s3">
+    <div class="section-label">Design Decisions</div>
+    <h2>こだわりポイント</h2>
+    <div class="points">
+      <div class="point-row">
+        <div class="point-num">01</div>
+        <div class="point-title">アクセスキー完全排除</div>
+        <div class="point-body">GitHub Actions の認証を OIDC に移行。長期クレデンシャルをゼロにし、漏洩リスクを排除した。</div>
+      </div>
+      <div class="point-row">
+        <div class="point-num">02</div>
+        <div class="point-title">SSH ポートの廃止</div>
+        <div class="point-body">22番ポートを完全クローズ。SSM Session Manager によりアウトバウンド HTTPS のみでセキュアなサーバーアクセスを実現。</div>
+      </div>
+      <div class="point-row">
+        <div class="point-num">03</div>
+        <div class="point-title">意図的にシンプルに保つ</div>
+        <div class="point-body">ALB・ASG・NAT GW は使用しない設計を選択。静的サイトに不要なコストを排除し、構成の意図を説明できる状態を維持。</div>
+      </div>
+    </div>
+  </section>
+
+</div>
+
+<!-- ── ナビゲーション ── -->
+<nav class="nav">
+  <button id="prev">←</button>
+  <div class="dots" id="dots"></div>
+  <button id="next">→</button>
+</nav>
+
+<div class="hint">← → or click</div>
+
+<script>
+  const slides = document.querySelectorAll('.slide');
+  const dotsEl = document.getElementById('dots');
+  const slideNum = document.getElementById('slideNum');
+  let current = 0;
+
+  // ドット生成
+  slides.forEach((_, i) => {
+    const d = document.createElement('div');
+    d.className = 'dot' + (i === 0 ? ' active' : '');
+    d.addEventListener('click', () => goTo(i));
+    dotsEl.appendChild(d);
+  });
+
+  function goTo(n) {
+    slides[current].classList.remove('active');
+    document.querySelectorAll('.dot')[current].classList.remove('active');
+    current = (n + slides.length) % slides.length;
+    slides[current].classList.add('active');
+    document.querySelectorAll('.dot')[current].classList.add('active');
+    const num = String(current + 1).padStart(2, '0');
+    const total = String(slides.length).padStart(2, '0');
+    slideNum.textContent = `${num} / ${total}`;
+  }
+
+  document.getElementById('next').addEventListener('click', () => goTo(current + 1));
+  document.getElementById('prev').addEventListener('click', () => goTo(current - 1));
+
+  document.addEventListener('keydown', e => {
+    if (e.key === 'ArrowRight' || e.key === 'ArrowDown') goTo(current + 1);
+    if (e.key === 'ArrowLeft'  || e.key === 'ArrowUp')   goTo(current - 1);
+  });
+</script>
+</body>
+</html>
