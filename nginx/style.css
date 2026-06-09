@@ -121,8 +121,8 @@ main {
 .box-text {
   line-height: 1.9;
   margin-top: 1em;
-  text-align: center;
-  padding: 0 3em;
+  text-align: left;
+  padding: 0 2em;
 }
 
 .box-text + .box-text {
@@ -234,8 +234,8 @@ main {
   font-size: 0.95rem;
   color: #3a3a3a;
   line-height: 1.9;
-  text-align: center;
-  padding: 0 3em;
+  text-align: left;
+  padding: 0 2em;
 }
 
 .article-body p {
