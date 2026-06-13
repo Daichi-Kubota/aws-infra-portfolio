@@ -21,6 +21,9 @@ body {
   display: flex;
   flex-direction: column;
   line-height: 1.8;
+  line-break: strict;
+  overflow-wrap: anywhere;
+  text-wrap: pretty;
 }
 
 /* ── トップライン ── */
@@ -89,6 +92,8 @@ main {
 
 /* ── 自己紹介 ── */
 .copy {
+  max-width: 34em;
+  margin: 0 auto;
   text-align: center;
   font-size: 0.95rem;
   color: #555;
@@ -100,13 +105,13 @@ main {
   border: 1px solid var(--border);
   border-left: 3px solid var(--accent);
   border-radius: 4px;
-  padding: 1.6rem 1.8rem;
+  padding: 1.6rem 1.6rem;
 }
 
 .yakuzaishi-box .box-title {
   font-family: "Hiragino Mincho ProN", "Yu Mincho", serif;
   font-size: 0.85rem;
-  letter-spacing: 0.2em;
+  letter-spacing: 0.16em;
   color: var(--accent);
   margin-bottom: 1rem;
   text-align: center;
@@ -119,10 +124,11 @@ main {
 }
 
 .box-text {
+  max-width: 32em;
+  margin: 1em auto 0;
+  padding: 0;
   line-height: 1.9;
-  margin-top: 1em;
   text-align: left;
-  padding: 0 2em;
 }
 
 .box-text + .box-text {
@@ -178,6 +184,7 @@ main {
 .github-btn {
   display: inline-flex;
   align-items: center;
+  justify-content: center;
   gap: 0.55rem;
   padding: 0.75rem 1.8rem;
   background: var(--accent);
@@ -231,11 +238,13 @@ main {
 }
 
 .article-body {
+  max-width: 34em;
+  margin: 0 auto;
+  padding: 0;
   font-size: 0.95rem;
   color: #3a3a3a;
-  line-height: 1.9;
+  line-height: 1.95;
   text-align: left;
-  padding: 0 2em;
 }
 
 .article-body p {
@@ -266,7 +275,25 @@ footer {
 
 /* ── レスポンシブ ── */
 @media (max-width: 480px) {
-  main { padding: 2.5rem 1.2rem 2rem; }
+  main { padding: 2.5rem 1.15rem 2rem; }
+
+  .copy { text-align: left; }
+
+  .yakuzaishi-box {
+    padding: 1.35rem 1.15rem;
+  }
+
+  .yakuzaishi-box .box-title {
+    letter-spacing: 0.1em;
+  }
+
+  .box-text,
+  .article-body {
+    max-width: none;
+    font-size: 0.92rem;
+    line-height: 1.9;
+  }
+
   .interest-grid { grid-template-columns: 1fr 1fr; gap: 0.7rem; }
   .interest-card { padding: 1rem; }
 }
