@@ -89,11 +89,16 @@ resource "aws_cloudwatch_metric_alarm" "disk_high" {
   }
 }
 
-# Route53 ヘルスチェック：外形監視（HTTPSで実際にサイトが応答するか確認）
+# Route53 ヘルスチェック：外形監視（サイトが応答するか確認）
+# HTTP(80)を見る理由はコスト：HTTPS指定は「オプション機能」扱いで月$1.00かかり、
+# さらに200応答だと本文3,868バイトを30秒ごとに全チェッカーリージョンへ送るため
+# リージョン間データ転送が月$0.59発生していた。80番はHTTPSへの301（169バイト）を返し、
+# Route53は3xxを正常と判定するため、ダウン検知は維持したまま両方の課金が消える。
+# 証明書の期限切れ検知が必要になったら type="HTTPS" / port=443 に戻す（月$1.6）。
 resource "aws_route53_health_check" "web" {
   fqdn              = var.domain_name
-  port              = 443
-  type              = "HTTPS"
+  port              = 80
+  type              = "HTTP"
   resource_path     = "/"
   failure_threshold = 3  # 3回連続失敗でアラート
   request_interval  = 30 # 30秒ごとにチェック
