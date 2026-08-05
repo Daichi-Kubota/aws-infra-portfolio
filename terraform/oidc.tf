@@ -55,23 +55,34 @@ resource "aws_iam_role_policy" "github_actions_ci" {
     Statement = [
       {
         # terraform plan に必要な読み取り権限
+        # plan は state 上の全リソースの現在値とタグを読むため、個別アクションを
+        # 列挙するとリソース追加のたびに AccessDenied で止まる。実際 s3:GetBucketPolicy と
+        # logs:ListTagsForResource の不足で plan が失敗していた。
+        # 変更を伴う動詞は一切含めず、サービスごとの読み取り系動詞で揃えている。
         Sid    = "TerraformReadOnly"
         Effect = "Allow"
         Action = [
           "ec2:Describe*",
+          "ec2:Get*",
           "vpc:Describe*",
           "iam:Get*",
           "iam:List*",
-          "s3:GetObject",
-          "s3:ListBucket",
+          "s3:Get*",
+          "s3:List*",
           "cloudwatch:Describe*",
           "cloudwatch:Get*",
+          "cloudwatch:List*",
           "logs:Describe*",
-          "sns:GetTopicAttributes",
-          "sns:ListTopics",
+          "logs:List*",
+          "cloudtrail:Describe*",
+          "cloudtrail:Get*",
+          "cloudtrail:ListTags",
+          "sns:Get*",
+          "sns:List*",
           "route53:Get*",
           "route53:List*",
           "dynamodb:DescribeTable",
+          "tag:GetResources",
           "sts:GetCallerIdentity"
         ]
         Resource = "*"
