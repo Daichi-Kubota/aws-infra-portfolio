@@ -96,7 +96,11 @@ jobs:
 
       - name: terraform plan
         id: plan
-        run: terraform plan -no-color 2>&1 | tee plan_output.txt
+        # pipefail が無いと終了コードが tee のもの（成功）になり、
+        # terraform が失敗してもジョブが緑のまま通ってしまう
+        run: |
+          set -o pipefail
+          terraform plan -no-color 2>&1 | tee plan_output.txt
         working-directory: ${{ env.WORKING_DIR }}
         continue-on-error: true
 
